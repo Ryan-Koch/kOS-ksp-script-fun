@@ -7,11 +7,7 @@ clearScreen.
 lock throttle to 1.0.
 
 // countdown loop
-PRINT "Count down to Mercury launch:".
-FROM {local countdown is 5.} UNTIL countdown = 0 STEP { SET countdown to countdown - 1. } DO {
-    print "..." + countdown.
-    wait 1.
-}
+countdown_timer(10, "Countdown for Mercury launch:").
 
 // activate the stage so something happens
 UNTIL ship:maxthrust > 0 {
@@ -27,25 +23,17 @@ when ship:airspeed > 0 then {
         print "..." + countdown.
         wait 1.
     }
-    print "Setting heading to 90 degree below north and 80 degrees above horizon".
+    print "Setting heading to 90, 80".
     lock steering to heading(90, 80).
 }
 
 when ship:obt:apoapsis >= 119000 then {
     lock throttle to 0.
     print "throttle to: " + throttle.
-    print "5 seconds until next stage".
-    FROM {local countdown is 5.} UNTIL countdown = 0 STEP { SET countdown to countdown - 1. } DO {
-        print "..." + countdown.
-        wait 1.
-    }
+    countdown_timer(5, "5 seconds until next stage:").
     print "staging".
     stage.
-    print "20 seconds until next stage".
-    FROM {local countdown is 20.} UNTIL countdown = 0 STEP { SET countdown to countdown - 1. } DO {
-        print "..." + countdown.
-        wait 1.
-    }
+    countdown_timer(20, "20 seconds until next stage:").
     print "staging".
     stage.
     print "RCS on".
@@ -55,11 +43,11 @@ when ship:obt:apoapsis >= 119000 then {
     when ship:verticalspeed <= 0 then {
         print "Steer to retrograde".
         lock steering to ship:retrograde.
-        print "We've crossed ap. Going to next stage...".
+        print "We've crossed ap. Going to next stage".
         stage.
         
         when ship:altitude <= 80000 then {
-            print "We're below 80km going to next stage...".
+            print "We're below 80km going to next stage".
             stage.
         }
     }
@@ -72,6 +60,18 @@ when ship:STAGENUM = 0 and ship:airspeed <= 2 then {
 
 // end program
 wait until ship:STAGENUM = 0 and ship:airspeed <= 1. 
+
+
+function countdown_timer {
+    parameter seconds.
+    parameter message.
+
+    print message:tostring.
+    FROM {local countdown is seconds.} UNTIL countdown = 0 STEP { SET countdown to countdown - 1. } DO {
+    print "..." + countdown.
+    wait 1.
+    }
+}
 
 
 
